@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "942481191967",
+    "project_id": "gestion-depense-eb85f",
+    "storage_bucket": "gestion-depense-eb85f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942481191967:android:461f7f4513675a7e35912a",
+        "android_client_info": {
+          "package_name": "com.example.gestion_depense"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCo1sUsFepsroB2bdk5aczC0Yj8xrTzrxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
