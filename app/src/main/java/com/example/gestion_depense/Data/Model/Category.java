@@ -14,4 +14,20 @@ public class Category {
 
     public String getName() { return name; }
     public boolean isDefault() { return isDefault; }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDefault(boolean aDefault) {
+        isDefault = aDefault;
+    }
 }
