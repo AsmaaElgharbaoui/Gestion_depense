@@ -4,34 +4,31 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="12dp"
-    android:gravity="center_vertical">
+    android:background="@color/white">
 
-    <!-- Nom de la catégorie -->
     <TextView
-        android:id="@+id/txtCategoryName"
+        android:id="@+id/txtName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Catégorie"
-        android:textSize="18sp"
-        android:textColor="@android:color/black" />
+        android:text="@string/nav_categories"
+        android:textSize="16sp"
+        android:textStyle="bold"/>
 
-    <!-- Bouton modifier -->
-    <ImageButton
+    <ImageView
         android:id="@+id/btnEdit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="8dp"
         android:src="@android:drawable/ic_menu_edit"
-        android:background="@android:color/transparent"
-        android:contentDescription="Modifier" />
+        android:contentDescription="Modifier"
+        android:visibility="gone"/>/>
 
-    <!-- Bouton supprimer -->
-    <ImageButton
+    <ImageView
         android:id="@+id/btnDelete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:src="@android:drawable/ic_menu_delete"
-        android:background="@android:color/transparent"
-        android:contentDescription="Supprimer" />
-
+        android:contentDescription="Supprimer"
+        android:visibility="gone"/>/>
 </LinearLayout>

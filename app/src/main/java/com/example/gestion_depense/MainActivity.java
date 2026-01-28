@@ -17,6 +17,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Initialiser les catégories par défaut (asynchrone)
+        FirebaseInitializer.initializeDefaultCategories();
+
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
         FloatingActionButton fab = findViewById(R.id.fabAdd);
 
@@ -33,16 +36,22 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(v -> {
             Fragment current = getSupportFragmentManager().findFragmentById(R.id.container);
             if (current instanceof CategoryFragment) {
-                ((CategoryFragment) current).showAddEditDialog(null);
+                ((CategoryFragment) current).openAddEditDialog(null);
             }
         });
 
+        // Charger le fragment par défaut
+        if (savedInstanceState == null) {
+            loadFragment(new CategoryFragment());
+        }
     }
 
     private void loadFragment(Fragment fragment) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.container, fragment)
-                .commit();
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .commit();
+        }
     }
 }
