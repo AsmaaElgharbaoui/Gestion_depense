@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.gestion_depense.UI.category.CategoryFragment;
 import com.example.gestion_depense.UI.depense.DepenseFragment;
 import com.example.gestion_depense.UI.depense.AddEditDepenseFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -17,11 +18,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Initialiser les catégories par défaut (asynchrone)
+        FirebaseInitializer.initializeDefaultCategories();
+
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
         FloatingActionButton fab = findViewById(R.id.fabAdd);
 
         // Charger le fragment par défaut
-        loadFragment(new DepenseFragment());
+        if (savedInstanceState == null) {
+            loadFragment(new DepenseFragment());
+        }
 
         // Gestion du menu du bottom navigation
         bottomNav.setOnItemSelectedListener(item -> {
@@ -29,12 +35,14 @@ public class MainActivity extends AppCompatActivity {
 
             if (item.getItemId() == R.id.nav_depenses) {
                 fragment = new DepenseFragment();
-            } /*else if (item.getItemId() == R.id.nav_category) {
-                fragment = new com.example.gestion_depense.UI.category.CategoryFragment();
-            } else if (item.getItemId() == R.id.nav_stats) {
-                fragment = new com.example.gestion_depense.UI.statistique.StatsFragment();
             }
-*/
+            else if (item.getItemId() == R.id.nav_categories) {
+                fragment = new CategoryFragment();
+            }
+            /*else if (item.getItemId() == R.id.nav_stats) {
+                fragment = new com.example.gestion_depense.UI.statistique.StatsFragment();
+            }*/
+
             if (fragment != null) {
                 loadFragment(fragment);
             }
@@ -42,15 +50,24 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        // Navigation vers AddEditDepenseFragment depuis le FAB
-        fab.setOnClickListener(v -> loadFragment(new AddEditDepenseFragment()));
+        // Navigation vers AddEditDepenseFragment ou Category selon le fragment affiché
+        fab.setOnClickListener(v -> {
+            Fragment current = getSupportFragmentManager().findFragmentById(R.id.container);
+            if (current instanceof DepenseFragment) {
+                loadFragment(new AddEditDepenseFragment());
+            } else if (current instanceof CategoryFragment) {
+                ((CategoryFragment) current).openAddEditDialog(null);
+            }
+        });
     }
 
     private void loadFragment(Fragment fragment) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.container, fragment)
-                .addToBackStack("depense_accueil")
-                .commit();
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .addToBackStack(null)
+                    .commit();
+        }
     }
 }

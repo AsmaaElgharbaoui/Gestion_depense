@@ -1,8 +1,13 @@
 package com.example.gestion_depense.Data.Model;
-public class Category {
 
+import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.PropertyName;
+
+public class Category {
+    @Exclude
     private String id;
     private String name;
+    @PropertyName("isDefault")
     private boolean isDefault;
 
     public Category() {}
@@ -11,23 +16,15 @@ public class Category {
         this.name = name;
         this.isDefault = isDefault;
     }
+    @Exclude
+    public String getId() { return id; }
+    @Exclude
+    public void setId(String id) { this.id = id; }
 
     public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    @PropertyName("isDefault")
     public boolean isDefault() { return isDefault; }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDefault(boolean aDefault) {
-        isDefault = aDefault;
-    }
+    @PropertyName("isDefault")
+    public void setDefault(boolean aDefault) { isDefault = aDefault; }
 }

@@ -1,3 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Gestion_depense</string>
+
+    <string name="app_name">Gestion Dépenses</string>
+
+    <!-- Navigation -->
+    <string name="nav_depenses">Dépenses</string>
+    <string name="nav_stats">Statistiques</string>
+    <string name="nav_categories">Catégories</string>
+
+    <!-- Catégories -->
+    <string name="add_category">Ajouter une catégorie</string>
+    <string name="edit_category">Modifier la catégorie</string>
+    <string name="category_name_hint">Nom de la catégorie</string>
+    <string name="save">Valider</string>
+    <string name="cancel">Annuler</string>
+    <string name="delete">Supprimer</string>
+
+    <!-- Messages -->
+    <string name="error_empty_name">Le nom ne peut pas être vide</string>
+    <string name="category_deleted">Catégorie supprimée</string>
+    <string name="category_default_locked">Cette catégorie est par défaut et ne peut pas être modifiée ou supprimée</string>
+
 </resources>
