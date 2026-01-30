@@ -26,7 +26,7 @@ public class AddEditDepenseFragment extends Fragment {
     private Date selectedDate;
 
     private Depense depenseToEdit = null;
-    private final String[] categories = { "Nourriture", "Transport", "Loisirs", "Autre" };
+    private Map<String, CheckBox> categoryCheckBoxMap = new HashMap<>();
 
     // ✅ Création d'une instance avec une dépense existante
     public static AddEditDepenseFragment newInstance(Depense depense) {
@@ -68,10 +68,38 @@ public class AddEditDepenseFragment extends Fragment {
 
     private void setupCategories() {
         layoutCategories.removeAllViews();
-        for (String cat : categories) {
-            CheckBox cb = new CheckBox(requireContext());
-            cb.setText(cat);
-            layoutCategories.addView(cb);
+        categoryCheckBoxMap.clear();
+
+        firestore.collection("categories")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (var doc : querySnapshot) {
+                        String name = doc.getString("name");
+
+                        CheckBox cb = new CheckBox(requireContext());
+                        cb.setText(name);
+
+                        layoutCategories.addView(cb);
+                        categoryCheckBoxMap.put(name, cb);
+                    }
+
+                    // Si édition → recocher
+                    if (depenseToEdit != null) {
+                        checkCategoriesForEdit();
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(requireContext(),
+                                "Erreur chargement catégories",
+                                Toast.LENGTH_SHORT).show());
+    }
+
+    private void checkCategoriesForEdit() {
+        if (depenseToEdit.getCategoryIds() == null) return;
+
+        for (String catId : depenseToEdit.getCategoryIds()) {
+            CheckBox cb = categoryCheckBoxMap.get(catId);
+            if (cb != null) cb.setChecked(true);
         }
     }
 
@@ -141,21 +169,23 @@ public class AddEditDepenseFragment extends Fragment {
         double montant = Double.parseDouble(montantStr);
         String description = edtDescription.getText().toString().trim();
 
-        List<String> selectedCategories = new ArrayList<>();
-        for (int i = 0; i < layoutCategories.getChildCount(); i++) {
-            CheckBox cb = (CheckBox) layoutCategories.getChildAt(i);
-            if (cb.isChecked()) selectedCategories.add(cb.getText().toString());
+        List<String> categoryNames = new ArrayList<>();
+        for (Map.Entry<String, CheckBox> entry : categoryCheckBoxMap.entrySet()) {
+            if (entry.getValue().isChecked()) {
+                categoryNames.add(entry.getKey());
+            }
         }
+
 
         Depense depense = new Depense(
                 montant,
                 description,
                 selectedDate,
-                selectedCategories.isEmpty() ? null : selectedCategories
+                categoryNames.isEmpty() ? null : categoryNames
         );
 
         if (depenseToEdit != null && depenseToEdit.getId() != null) {
-            // 🔹 Mode modification
+            // Mode modification
             firestore.collection("depenses")
                     .document(depenseToEdit.getId())
                     .set(depense)
@@ -169,16 +199,18 @@ public class AddEditDepenseFragment extends Fragment {
                     .addOnFailureListener(e -> Toast.makeText(requireContext(),
                             "Erreur : " + e.getMessage(), Toast.LENGTH_LONG).show());
         } else {
-
-            // 🔹 Mode ajout
+            // Mode ajout
             firestore.collection("depenses")
                     .add(depense)
                     .addOnSuccessListener(doc -> {
                         Toast.makeText(requireContext(), "Dépense ajoutée", Toast.LENGTH_SHORT).show();
+
+                        // 🔹 Retour à la page accueil des dépenses
                         requireActivity().onBackPressed();
                     })
                     .addOnFailureListener(e -> Toast.makeText(requireContext(),
                             "Erreur : " + e.getMessage(), Toast.LENGTH_LONG).show());
         }
+
     }
 }
