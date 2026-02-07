@@ -91,15 +91,29 @@ public class DepenseFragment extends Fragment {
     }
 
     private void filterDepenses(String query) {
+        if (query == null || query.isEmpty()) {
+            adapter.setDepenses(allDepenses);
+            return;
+        }
+
+        String searchLower = query.toLowerCase();
         List<Depense> filtered = new ArrayList<>();
+
         for (Depense d : allDepenses) {
-            if (d.getDescription() != null &&
-                    d.getDescription().toLowerCase().contains(query.toLowerCase())) {
-                filtered.add(d);
+            if (d.getCategoryIds() != null && !d.getCategoryIds().isEmpty()) {
+                for (String cat : d.getCategoryIds()) {
+                    if (cat.toLowerCase().contains(searchLower)) {
+                        filtered.add(d);
+                        break; // on a trouvé une catégorie correspondante, pas besoin de continuer
+                    }
+                }
             }
         }
+
         adapter.setDepenses(filtered);
     }
+
+
 
     private void openDateFilter() {
         String type = spinnerDateType.getSelectedItem().toString();
