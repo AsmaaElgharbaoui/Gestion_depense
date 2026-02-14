@@ -27,6 +27,10 @@ public class DepenseFragment extends Fragment {
     private EditText edtSearch;
     private Spinner spinnerDateType;
     private final List<Depense> allDepenses = new ArrayList<>();
+    // 🔹 Etat des filtres
+    private String currentCategoryQuery = "";
+    private Calendar currentDateFilter = null;
+    private String currentDateType = null; // "day", "month", "year"
 
     @Nullable
     @Override
@@ -91,26 +95,8 @@ public class DepenseFragment extends Fragment {
     }
 
     private void filterDepenses(String query) {
-        if (query == null || query.isEmpty()) {
-            adapter.setDepenses(allDepenses);
-            return;
-        }
-
-        String searchLower = query.toLowerCase();
-        List<Depense> filtered = new ArrayList<>();
-
-        for (Depense d : allDepenses) {
-            if (d.getCategoryIds() != null && !d.getCategoryIds().isEmpty()) {
-                for (String cat : d.getCategoryIds()) {
-                    if (cat.toLowerCase().contains(searchLower)) {
-                        filtered.add(d);
-                        break; // on a trouvé une catégorie correspondante, pas besoin de continuer
-                    }
-                }
-            }
-        }
-
-        adapter.setDepenses(filtered);
+        currentCategoryQuery = query == null ? "" : query.toLowerCase();
+        applyFilters();
     }
 
 
@@ -126,7 +112,10 @@ public class DepenseFragment extends Fragment {
                             calendar.set(year, month, dayOfMonth);
                             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                             txtDate.setText("📅 " + sdf.format(calendar.getTime()));
-                            filterDepensesByDate(calendar, "day");
+                            currentDateFilter = calendar;
+                            currentDateType = "day";
+                            applyFilters();
+
                         },
                         calendar.get(Calendar.YEAR),
                         calendar.get(Calendar.MONTH),
@@ -155,7 +144,10 @@ public class DepenseFragment extends Fragment {
                             calendar.set(npYear.getValue(), npMonth.getValue() - 1, 1);
                             SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
                             txtDate.setText("📅 " + sdf.format(calendar.getTime()));
-                            filterDepensesByDate(calendar, "month");
+                            currentDateFilter = calendar;
+                            currentDateType = "month";
+                            applyFilters();
+
                         })
                         .setNegativeButton("Annuler", null)
                         .show();
@@ -172,37 +164,69 @@ public class DepenseFragment extends Fragment {
                         .setPositiveButton("OK", (dialog, which) -> {
                             calendar.set(np.getValue(), 0, 1);
                             txtDate.setText("📅 " + np.getValue());
-                            filterDepensesByDate(calendar, "year");
+                            currentDateFilter = calendar;
+                            currentDateType = "year";
+                            applyFilters();
+
                         })
                         .setNegativeButton("Annuler", null)
                         .show();
                 break;
         }
     }
-
-    private void filterDepensesByDate(Calendar calendar, String type) {
+    private void applyFilters() {
         List<Depense> filtered = new ArrayList<>();
+
         for (Depense d : allDepenses) {
-            if (d.getDate() == null) continue;
-            Calendar dep = Calendar.getInstance();
-            dep.setTime(d.getDate());
-            boolean match = false;
-            switch (type) {
-                case "day":
-                    match = dep.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) &&
-                            dep.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
-                            dep.get(Calendar.DAY_OF_MONTH) == calendar.get(Calendar.DAY_OF_MONTH);
-                    break;
-                case "month":
-                    match = dep.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) &&
-                            dep.get(Calendar.MONTH) == calendar.get(Calendar.MONTH);
-                    break;
-                case "year":
-                    match = dep.get(Calendar.YEAR) == calendar.get(Calendar.YEAR);
-                    break;
+
+            boolean matchCategory = true;
+            boolean matchDate = true;
+
+            // 🔹 Filtre catégorie
+            if (!currentCategoryQuery.isEmpty()) {
+                matchCategory = false;
+                if (d.getCategoryIds() != null) {
+                    for (String cat : d.getCategoryIds()) {
+                        if (cat.toLowerCase().contains(currentCategoryQuery)) {
+                            matchCategory = true;
+                            break;
+                        }
+                    }
+                }
             }
-            if (match) filtered.add(d);
+
+            // 🔹 Filtre date
+            if (currentDateFilter != null && d.getDate() != null) {
+                Calendar dep = Calendar.getInstance();
+                dep.setTime(d.getDate());
+
+                switch (currentDateType) {
+                    case "day":
+                        matchDate =
+                                dep.get(Calendar.YEAR) == currentDateFilter.get(Calendar.YEAR) &&
+                                        dep.get(Calendar.MONTH) == currentDateFilter.get(Calendar.MONTH) &&
+                                        dep.get(Calendar.DAY_OF_MONTH) == currentDateFilter.get(Calendar.DAY_OF_MONTH);
+                        break;
+
+                    case "month":
+                        matchDate =
+                                dep.get(Calendar.YEAR) == currentDateFilter.get(Calendar.YEAR) &&
+                                        dep.get(Calendar.MONTH) == currentDateFilter.get(Calendar.MONTH);
+                        break;
+
+                    case "year":
+                        matchDate =
+                                dep.get(Calendar.YEAR) == currentDateFilter.get(Calendar.YEAR);
+                        break;
+                }
+            }
+
+            // 🔹 Appliquer les deux filtres ensemble
+            if (matchCategory && matchDate) {
+                filtered.add(d);
+            }
         }
+
         adapter.setDepenses(filtered);
     }
 
