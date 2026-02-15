@@ -7,37 +7,87 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Titre de la période affichée -->
+    <TextView
+        android:id="@+id/txtPeriodTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Évolution des dépenses"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp"/>
+
+    <!-- Ligne des boutons jour / mois / année -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingBottom="8dp">
 
         <Button
             android:id="@+id/btnWeek"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Semaine"/>
+            android:text="Par jour"/>
 
         <Button
             android:id="@+id/btnMonth"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Mois"/>
+            android:text="Par mois"/>
 
         <Button
             android:id="@+id/btnYear"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Année"/>
+            android:text="Par année"/>
     </LinearLayout>
 
+    <!-- LineChart pour l'évolution -->
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/lineChart"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:layout_marginTop="20dp"/>
+        android:layout_height="300dp"
+        android:layout_marginBottom="16dp"/>
 
+    <!-- Total et moyenne -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/txtTotal"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Total: 0 DH"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/txtAverage"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Moyenne: 0 DH"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+    <!-- Message quand il n'y a pas de données -->
+    <TextView
+        android:id="@+id/txtNoData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aucune dépense"
+        android:textSize="16sp"
+        android:textColor="#FF0000"
+        android:visibility="gone"
+        android:gravity="center"
+        android:paddingTop="16dp"/>
 </LinearLayout>
