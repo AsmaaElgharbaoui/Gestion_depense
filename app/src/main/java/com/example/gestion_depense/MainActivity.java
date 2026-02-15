@@ -1,6 +1,7 @@
 package com.example.gestion_depense;
 
 import android.os.Bundle;
+import com.example.gestion_depense.UI.statistique.StatsFragment;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -39,9 +40,9 @@ public class MainActivity extends AppCompatActivity {
             else if (item.getItemId() == R.id.nav_categories) {
                 fragment = new CategoryFragment();
             }
-            /*else if (item.getItemId() == R.id.nav_stats) {
+            else if (item.getItemId() == R.id.nav_stats) {
                 fragment = new com.example.gestion_depense.UI.statistique.StatsFragment();
-            }*/
+            }
 
             if (fragment != null) {
                 loadFragment(fragment);
