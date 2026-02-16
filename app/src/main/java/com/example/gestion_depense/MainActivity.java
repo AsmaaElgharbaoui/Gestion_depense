@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         // Charger le fragment par défaut
         if (savedInstanceState == null) {
             loadFragment(new DepenseFragment());
+            fab.show();
         }
 
         // Gestion du menu du bottom navigation
@@ -36,12 +37,15 @@ public class MainActivity extends AppCompatActivity {
 
             if (item.getItemId() == R.id.nav_depenses) {
                 fragment = new DepenseFragment();
+                fab.show();
             }
             else if (item.getItemId() == R.id.nav_categories) {
                 fragment = new CategoryFragment();
+                fab.show();
             }
             else if (item.getItemId() == R.id.nav_stats) {
                 fragment = new com.example.gestion_depense.UI.statistique.StatsFragment();
+                fab.hide();
             }
 
             if (fragment != null) {
