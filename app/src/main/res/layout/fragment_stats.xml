@@ -1,93 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <!-- Titre de la période affichée -->
-    <TextView
-        android:id="@+id/txtPeriodTitle"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Évolution des dépenses"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingBottom="8dp"/>
+        app:tabIndicatorColor="#2196F3"
+        app:tabSelectedTextColor="#2196F3"
+        app:tabTextColor="#666666"/>
 
-    <!-- Ligne des boutons jour / mois / année -->
-    <LinearLayout
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingBottom="8dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
-        <Button
-            android:id="@+id/btnWeek"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Par jour"/>
-
-        <Button
-            android:id="@+id/btnMonth"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Par mois"/>
-
-        <Button
-            android:id="@+id/btnYear"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Par année"/>
-    </LinearLayout>
-
-    <!-- LineChart pour l'évolution -->
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/lineChart"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_marginBottom="16dp"/>
-
-    <!-- Total et moyenne -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="2"
-        android:paddingBottom="8dp">
-
-        <TextView
-            android:id="@+id/txtTotal"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Total: 0 DH"
-            android:textSize="16sp"/>
-
-        <TextView
-            android:id="@+id/txtAverage"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Moyenne: 0 DH"
-            android:textSize="16sp"/>
-    </LinearLayout>
-
-    <!-- Message quand il n'y a pas de données -->
-    <TextView
-        android:id="@+id/txtNoData"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Aucune dépense"
-        android:textSize="16sp"
-        android:textColor="#FF0000"
-        android:visibility="gone"
-        android:gravity="center"
-        android:paddingTop="16dp"/>
 </LinearLayout>
