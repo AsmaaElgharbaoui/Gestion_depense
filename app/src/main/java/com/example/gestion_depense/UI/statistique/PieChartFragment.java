@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.gestion_depense.Data.Model.CategoryStat;
-import com.example.gestion_depense.UI.category.CategoryStatAdapter;
 import com.example.gestion_depense.Data.Firebase.FirebaseManager;
 import com.example.gestion_depense.Data.Model.Depense;
 import com.example.gestion_depense.R;

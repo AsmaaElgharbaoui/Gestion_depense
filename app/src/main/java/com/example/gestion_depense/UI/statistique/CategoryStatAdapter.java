@@ -1,4 +1,4 @@
-package com.example.gestion_depense.UI.category;
+package com.example.gestion_depense.UI.statistique;
 
 import android.view.LayoutInflater;
 import android.view.View;

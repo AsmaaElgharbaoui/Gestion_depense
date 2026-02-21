@@ -11,264 +11,355 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
+import com.example.gestion_depense.Data.Firebase.FirebaseManager;
 import com.example.gestion_depense.Data.Model.Depense;
 import com.example.gestion_depense.R;
-import com.example.gestion_depense.ViewModel.StatsViewModel;
-import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class BarChartFragment extends Fragment {
 
-    private LineChart lineChart;
-    private Button btnDay, btnMonth, btnYear;
-    private TextView txtTotal, txtAverage, txtPeriodTitle, txtNoData;
+    private BarChart barChart;
+    private TabLayout tabPeriod;
+    private TextView txtSelectedPeriod, txtTotal, txtAverage, txtNoData;
+    private Button btnPrevious, btnNext;
 
-    private StatsViewModel viewModel;
     private List<Depense> allDepenses = new ArrayList<>();
+    private String currentPeriod = "mois"; // semaine, mois, année
+    private Date currentDate = new Date();
+
+    // Formats de date
+    private SimpleDateFormat monthFormat = new SimpleDateFormat("MMMM yyyy", Locale.FRENCH);
+    private SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy", Locale.FRENCH);
+    private SimpleDateFormat weekFormat = new SimpleDateFormat("'Semaine' w", Locale.FRENCH);
+    private SimpleDateFormat dayMonthFormat = new SimpleDateFormat("dd MMM", Locale.FRENCH);
+    private SimpleDateFormat dayFormat = new SimpleDateFormat("EEE", Locale.FRENCH);
+    private SimpleDateFormat monthShortFormat = new SimpleDateFormat("MMM", Locale.FRENCH);
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_bar_chart, container, false);
 
-        // --- Liens XML ---
-        lineChart = view.findViewById(R.id.lineChart);
-        btnDay = view.findViewById(R.id.btnDay);
-        btnMonth = view.findViewById(R.id.btnMonth);
-        btnYear = view.findViewById(R.id.btnYear);
-        txtTotal = view.findViewById(R.id.txtTotal);
-        txtAverage = view.findViewById(R.id.txtAverage);
-        txtPeriodTitle = view.findViewById(R.id.txtPeriodTitle);
-        txtNoData = view.findViewById(R.id.txtNoData);
-
+        initViews(view);
         setupChart();
-
-        // --- ViewModel ---
-        viewModel = new ViewModelProvider(this).get(StatsViewModel.class);
-        viewModel.getDepensesLiveData().observe(getViewLifecycleOwner(), depenses -> {
-            allDepenses = depenses;
-            if (allDepenses.isEmpty()) {
-                txtNoData.setVisibility(View.VISIBLE);
-                txtNoData.setText("Aucune dépense enregistrée");
-            } else {
-                txtNoData.setVisibility(View.GONE);
-                showDayStats(); // affichage par défaut
-            }
-        });
-        viewModel.loadDepenses();
-
-        // --- Boutons ---
-        btnDay.setOnClickListener(v -> showDayStats());
-        btnMonth.setOnClickListener(v -> showMonthStats());
-        btnYear.setOnClickListener(v -> showYearStats());
+        loadDepenses();
 
         return view;
     }
 
-    private void setupChart() {
-        lineChart.getDescription().setEnabled(false);
-        lineChart.setDrawGridBackground(false);
-        lineChart.setBackgroundColor(Color.WHITE);
-        lineChart.setTouchEnabled(true);
-        lineChart.setDragEnabled(true);
-        lineChart.setScaleEnabled(true);
+    private void initViews(View view) {
+        barChart = view.findViewById(R.id.barChart);
+        tabPeriod = view.findViewById(R.id.tabPeriod);
+        txtSelectedPeriod = view.findViewById(R.id.txtSelectedPeriod);
+        txtTotal = view.findViewById(R.id.txtTotal);
+        txtAverage = view.findViewById(R.id.txtAverage);
+        txtNoData = view.findViewById(R.id.txtNoData);
+        btnPrevious = view.findViewById(R.id.btnPrevious);
+        btnNext = view.findViewById(R.id.btnNext);
 
-        XAxis xAxis = lineChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false);
+        // Sélectionner Mois par défaut
+        tabPeriod.getTabAt(1).select();
 
-        YAxis leftAxis = lineChart.getAxisLeft();
-        leftAxis.setDrawGridLines(true);
-        leftAxis.setAxisMinimum(0f);
-        lineChart.getAxisRight().setEnabled(false);
-        lineChart.getLegend().setEnabled(false);
-    }
-
-    // --- Jour ---
-    private void showDayStats() {
-        txtPeriodTitle.setText("Évolution par jour");
-        if (allDepenses.isEmpty()) return;
-
-        // Date de la première dépense
-        Date firstDate = null;
-        for (Depense d : allDepenses) {
-            if (d.getDate() == null) continue;
-            if (firstDate == null || d.getDate().before(firstDate)) {
-                firstDate = d.getDate();
-            }
-        }
-        if (firstDate == null) firstDate = new Date();
-
-        Date today = new Date();
-        Calendar start = Calendar.getInstance();
-        start.setTime(firstDate);
-        Calendar end = Calendar.getInstance();
-        end.setTime(today);
-
-        List<Entry> entries = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-        int index = 0;
-
-        while (!start.after(end)) {
-            double total = 0;
-            for (Depense d : allDepenses) {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(d.getDate());
-                if (cal.get(Calendar.YEAR) == start.get(Calendar.YEAR)
-                        && cal.get(Calendar.MONTH) == start.get(Calendar.MONTH)
-                        && cal.get(Calendar.DAY_OF_MONTH) == start.get(Calendar.DAY_OF_MONTH)) {
-                    total += d.getMontant();
-                }
-            }
-            entries.add(new Entry(index, (float) total));
-            labels.add(new SimpleDateFormat("dd/MM", Locale.getDefault()).format(start.getTime()));
-            start.add(Calendar.DAY_OF_MONTH, 1);
-            index++;
-        }
-
-        drawLineChart(entries, labels);
-    }
-
-    // --- Mois ---
-    private void showMonthStats() {
-        txtPeriodTitle.setText("Évolution par mois");
-        if (allDepenses.isEmpty()) return;
-
-        Date firstDate = Collections.min(allDepenses, (a, b) -> a.getDate().compareTo(b.getDate())).getDate();
-        Date today = new Date();
-
-        Calendar start = Calendar.getInstance();
-        start.setTime(firstDate);
-        start.set(Calendar.DAY_OF_MONTH, 1);
-
-        Calendar end = Calendar.getInstance();
-        end.setTime(today);
-        end.set(Calendar.DAY_OF_MONTH, 1);
-
-        List<Entry> entries = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-        int index = 0;
-
-        while (!start.after(end)) {
-            double total = 0;
-            for (Depense d : allDepenses) {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(d.getDate());
-                if (cal.get(Calendar.YEAR) == start.get(Calendar.YEAR)
-                        && cal.get(Calendar.MONTH) == start.get(Calendar.MONTH)) {
-                    total += d.getMontant();
-                }
-            }
-            entries.add(new Entry(index, (float) total));
-            labels.add(new SimpleDateFormat("MM/yyyy", Locale.getDefault()).format(start.getTime()));
-            start.add(Calendar.MONTH, 1);
-            index++;
-        }
-
-        drawLineChart(entries, labels);
-    }
-
-    // --- Année ---
-    private void showYearStats() {
-        txtPeriodTitle.setText("Évolution par année");
-        if (allDepenses.isEmpty()) return;
-
-        Date firstDate = Collections.min(allDepenses, (a, b) -> a.getDate().compareTo(b.getDate())).getDate();
-        Date today = new Date();
-
-        Calendar start = Calendar.getInstance();
-        start.setTime(firstDate);
-        start.set(Calendar.MONTH, 0);
-        start.set(Calendar.DAY_OF_MONTH, 1);
-
-        Calendar end = Calendar.getInstance();
-        end.setTime(today);
-        end.set(Calendar.MONTH, 0);
-        end.set(Calendar.DAY_OF_MONTH, 1);
-
-        List<Entry> entries = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-        int index = 0;
-
-        while (!start.after(end)) {
-            double total = 0;
-            for (Depense d : allDepenses) {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(d.getDate());
-                if (cal.get(Calendar.YEAR) == start.get(Calendar.YEAR)) {
-                    total += d.getMontant();
-                }
-            }
-            entries.add(new Entry(index, (float) total));
-            labels.add(String.valueOf(start.get(Calendar.YEAR)));
-            start.add(Calendar.YEAR, 1);
-            index++;
-        }
-
-        drawLineChart(entries, labels);
-    }
-
-    // --- Affichage du graphique ---
-    private void drawLineChart(List<Entry> entries, List<String> labels) {
-        if (entries.isEmpty()) {
-            lineChart.clear();
-            txtNoData.setVisibility(View.VISIBLE);
-            txtNoData.setText("Aucune donnée");
-            return;
-        }
-
-        txtNoData.setVisibility(View.GONE);
-
-        LineDataSet dataSet = new LineDataSet(entries, "Dépenses");
-        dataSet.setColor(Color.parseColor("#2196F3"));
-        dataSet.setCircleColor(Color.parseColor("#2196F3"));
-        dataSet.setLineWidth(2f);
-        dataSet.setCircleRadius(4f);
-        dataSet.setValueTextSize(10f);
-        dataSet.setValueTextColor(Color.BLACK);
-
-        LineData lineData = new LineData(dataSet);
-        lineChart.setData(lineData);
-
-        XAxis xAxis = lineChart.getXAxis();
-        xAxis.setGranularity(1f);
-        xAxis.setValueFormatter(new ValueFormatter() {
+        tabPeriod.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public String getAxisLabel(float value, com.github.mikephil.charting.components.AxisBase axis) {
-                int i = (int) value;
-                if (i >= 0 && i < labels.size()) return labels.get(i);
-                return "";
+            public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getPosition()) {
+                    case 0:
+                        currentPeriod = "semaine";
+                        break;
+                    case 1:
+                        currentPeriod = "mois";
+                        break;
+                    case 2:
+                        currentPeriod = "année";
+                        break;
+                }
+                updateDisplay();
             }
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) { updateDisplay(); }
         });
 
-        lineChart.invalidate();
+        btnPrevious.setOnClickListener(v -> {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(currentDate);
 
-        // Total et moyenne
-        float total = 0;
-        int countWithData = 0;
-        for (Entry e : entries) {
-            total += e.getY();
-            if (e.getY() > 0) countWithData++;
+            if (currentPeriod.equals("mois")) {
+                cal.add(Calendar.MONTH, -1);
+            } else if (currentPeriod.equals("année")) {
+                cal.add(Calendar.YEAR, -1);
+            } else {
+                cal.add(Calendar.WEEK_OF_YEAR, -1);
+            }
+
+            currentDate = cal.getTime();
+            updateDisplay();
+        });
+
+        btnNext.setOnClickListener(v -> {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(currentDate);
+
+            if (currentPeriod.equals("mois")) {
+                cal.add(Calendar.MONTH, 1);
+            } else if (currentPeriod.equals("année")) {
+                cal.add(Calendar.YEAR, 1);
+            } else {
+                cal.add(Calendar.WEEK_OF_YEAR, 1);
+            }
+
+            currentDate = cal.getTime();
+            updateDisplay();
+        });
+    }
+
+    private void setupChart() {
+        barChart.getDescription().setEnabled(false);
+        barChart.setDrawGridBackground(false);
+        barChart.animateY(1000);
+        barChart.setDrawBarShadow(false);
+        barChart.setDrawValueAboveBar(true);
+
+        XAxis xAxis = barChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setDrawGridLines(false);
+        xAxis.setGranularity(1f);
+    }
+
+    private void loadDepenses() {
+        FirebaseManager.getDB()
+                .collection("depenses")
+                .get()
+                .addOnSuccessListener(query -> {
+                    allDepenses.clear();
+                    for (QueryDocumentSnapshot doc : query) {
+                        Depense d = doc.toObject(Depense.class);
+                        if (d != null) {
+                            d.setId(doc.getId());
+                            allDepenses.add(d);
+                        }
+                    }
+                    updateDisplay();
+                })
+                .addOnFailureListener(e -> {
+                    txtNoData.setVisibility(View.VISIBLE);
+                    txtNoData.setText("Erreur: " + e.getMessage());
+                });
+    }
+
+    private void updateDisplay() {
+        updateDateText();
+
+        // Récupérer les données filtrées pour la période
+        Map<String, Float> data = getFilteredData();
+
+        if (data.isEmpty()) {
+            // Pas de dépenses pour cette période
+            barChart.setVisibility(View.GONE);
+            txtNoData.setVisibility(View.VISIBLE);
+            txtNoData.setText("Aucune dépense pour " + txtSelectedPeriod.getText());
+
+            // Remettre les totaux à zéro
+            txtTotal.setText("0.00");
+            txtAverage.setText("0.00");
+        } else {
+            // Des dépenses existent
+            barChart.setVisibility(View.VISIBLE);
+            txtNoData.setVisibility(View.GONE);
+
+            // Mettre à jour le graphique
+            updateChart(data);
+
+            // Calculer et afficher le total et la moyenne
+            updateTotals(data);
         }
-        txtTotal.setText(String.format(Locale.getDefault(), "Total: %.2f DH", total));
-        txtAverage.setText(String.format(Locale.getDefault(), "Moyenne: %.2f DH",
-                countWithData > 0 ? total / countWithData : 0));
+    }
+
+    /**
+     * Met à jour le texte de la période sélectionnée
+     */
+    private void updateDateText() {
+        String text = "";
+
+        if (currentPeriod.equals("mois")) {
+            text = monthFormat.format(currentDate);
+        }
+        else if (currentPeriod.equals("année")) {
+            text = yearFormat.format(currentDate);
+        }
+        else { // semaine
+            int weekNumber = getWeekNumber(currentDate);
+            String weekRange = getWeekDateRange(currentDate);
+            text = "Semaine " + weekNumber + " (" + weekRange + ")";
+        }
+
+        txtSelectedPeriod.setText(text);
+    }
+
+    /**
+     * Récupère le numéro de la semaine dans l'année
+     */
+    private int getWeekNumber(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.WEEK_OF_YEAR);
+    }
+
+    /**
+     * Calcule la plage de dates de la semaine (Lundi au Dimanche)
+     */
+    private String getWeekDateRange(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+
+        // Aller au Lundi de la semaine
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        Date startDate = cal.getTime();
+
+        // Aller au Dimanche de la semaine
+        cal.add(Calendar.DAY_OF_WEEK, 6);
+        Date endDate = cal.getTime();
+
+        return dayMonthFormat.format(startDate) + " - " + dayMonthFormat.format(endDate);
+    }
+
+    /**
+     * Calcule le numéro de la semaine DANS LE MOIS (1-5)
+     */
+    private int getWeekOfMonth(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.WEEK_OF_MONTH);
+    }
+
+    /**
+     * Filtre les dépenses selon la période et les groupe
+     */
+    private Map<String, Float> getFilteredData() {
+        Map<String, Float> data = new TreeMap<>(); // TreeMap pour garder l'ordre
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(currentDate);
+
+        int targetYear = cal.get(Calendar.YEAR);
+        int targetMonth = cal.get(Calendar.MONTH);
+        int targetWeek = cal.get(Calendar.WEEK_OF_YEAR);
+
+        for (Depense d : allDepenses) {
+            if (d.getDate() == null) continue;
+
+            Calendar depCal = Calendar.getInstance();
+            depCal.setTime(d.getDate());
+
+            boolean include = false;
+            String key = "";
+
+            if (currentPeriod.equals("semaine")) {
+                // Filtrer par semaine
+                if (depCal.get(Calendar.YEAR) == targetYear &&
+                        depCal.get(Calendar.WEEK_OF_YEAR) == targetWeek) {
+                    include = true;
+                    // Grouper par jour
+                    key = dayFormat.format(d.getDate());
+                }
+            }
+            else if (currentPeriod.equals("mois")) {
+                // Filtrer par mois
+                if (depCal.get(Calendar.YEAR) == targetYear &&
+                        depCal.get(Calendar.MONTH) == targetMonth) {
+                    include = true;
+                    // Grouper par semaine DANS LE MOIS (S1, S2, S3, S4, S5)
+                    int weekOfMonth = getWeekOfMonth(d.getDate());
+                    key = "S" + weekOfMonth;
+                }
+            }
+            else if (currentPeriod.equals("année")) {
+                // Filtrer par année
+                if (depCal.get(Calendar.YEAR) == targetYear) {
+                    include = true;
+                    // Grouper par mois
+                    key = monthShortFormat.format(d.getDate());
+                }
+            }
+
+            if (include) {
+                float current = data.getOrDefault(key, 0f);
+                data.put(key, current + (float) d.getMontant());
+            }
+        }
+
+        return data;
+    }
+
+    /**
+     * Met à jour le graphique avec les données
+     */
+    private void updateChart(Map<String, Float> data) {
+        List<BarEntry> entries = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        int index = 0;
+
+        for (Map.Entry<String, Float> entry : data.entrySet()) {
+            entries.add(new BarEntry(index, entry.getValue()));
+            labels.add(entry.getKey());
+            index++;
+        }
+
+        BarDataSet dataSet = new BarDataSet(entries, "Dépenses");
+        dataSet.setColors(Color.parseColor("#2196F3"));
+        dataSet.setValueTextSize(12f);
+        dataSet.setValueTextColor(Color.BLACK);
+
+        BarData barData = new BarData(dataSet);
+        barData.setBarWidth(0.7f);
+
+        XAxis xAxis = barChart.getXAxis();
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
+        xAxis.setLabelCount(labels.size());
+
+        barChart.setData(barData);
+        barChart.setFitBars(true);
+        barChart.invalidate();
+    }
+
+    /**
+     * Calcule et affiche le total et la moyenne
+     */
+    private void updateTotals(Map<String, Float> data) {
+        float total = 0;
+        for (float value : data.values()) {
+            total += value;
+        }
+
+        float average = total / data.size(); // Moyenne = total / nombre de périodes
+
+        txtTotal.setText(String.format(Locale.FRENCH, "%.2f", total));
+        txtAverage.setText(String.format(Locale.FRENCH, "%.2f", average));
+    }
+
+    /**
+     * Récupère le nombre de semaines dans le mois courant
+     */
+    private int getWeeksInMonth(int year, int month) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(year, month, 1);
+        return cal.getActualMaximum(Calendar.WEEK_OF_MONTH);
     }
 }
