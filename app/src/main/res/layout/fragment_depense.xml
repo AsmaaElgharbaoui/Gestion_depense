@@ -6,52 +6,58 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Titre -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Gestionnaire de Dépenses"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:paddingBottom="8dp"/>
+        android:paddingBottom="12dp"/>
 
-    <!-- Type de filtre + recherche -->
+    <!-- Ligne filtres -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingBottom="8dp">
+        android:paddingBottom="12dp">
 
         <Spinner
             android:id="@+id/spinnerDateType"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
+            android:paddingEnd="8dp"
             android:spinnerMode="dropdown"/>
 
         <TextView
             android:id="@+id/txtDate"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:text="📅 Choisir"
-            android:padding="8dp"
+            android:gravity="center"
+            android:paddingHorizontal="12dp"
+            android:background="@android:drawable/editbox_background"
             android:clickable="true"
             android:focusable="true"/>
 
         <EditText
             android:id="@+id/edtSearch"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:hint="Rechercher"
             android:inputType="text"
-            android:padding="8dp"
-            android:gravity="end"
-           />
+            android:paddingHorizontal="12dp"
+            android:layout_marginStart="8dp"
+            android:background="@android:drawable/editbox_background"/>
     </LinearLayout>
 
+    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerDepenses"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:clipToPadding="false"/>
 </LinearLayout>

@@ -4,75 +4,133 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.gestion_depense.R;
 import com.example.gestion_depense.Data.Model.Depense;
+import com.example.gestion_depense.Data.Model.DepenseGroup;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-public class DepenseAdapter extends RecyclerView.Adapter<DepenseAdapter.ViewHolder> {
+public class DepenseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<Depense> depenses = new ArrayList<>();
+    private static final int TYPE_HEADER = 0;
+    private static final int TYPE_ITEM = 1;
+
+    private List<Object> items = new ArrayList<>();
     private OnItemClickListener listener;
 
     public interface OnItemClickListener {
-        void onEdit(Depense depense);
-        void onDelete(Depense depense);
-        void onItemClick(Depense depense); // Pour aller vers le détail
+        void onItemClick(Depense depense);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
 
-    public void setDepenses(List<Depense> depenses) {
-        this.depenses = depenses != null ? depenses : new ArrayList<>();
+    // 🔥 IMPORTANT : méthode demandée
+    public void setGroupedDepenses(List<DepenseGroup> groups) {
+        items.clear();
+
+        for (DepenseGroup group : groups) {
+            items.add(group); // header
+            items.addAll(group.getDepenses()); // items
+        }
+
         notifyDataSetChanged();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (items.get(position) instanceof DepenseGroup)
+            return TYPE_HEADER;
+        else
+            return TYPE_ITEM;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_depense, parent, false);
-        return new ViewHolder(v);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        if (viewType == TYPE_HEADER) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_depense_header, parent, false);
+            return new HeaderHolder(v);
+        } else {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_depense, parent, false);
+            return new ItemHolder(v);
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Depense d = depenses.get(position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
-        holder.amount.setText(d.getMontant() + " DH");
+        if (holder instanceof HeaderHolder) {
 
-        if (d.getCategoryIds() != null && !d.getCategoryIds().isEmpty()) {
-            holder.category.setText(String.join(", ", d.getCategoryIds()));
+            DepenseGroup group = (DepenseGroup) items.get(position);
+
+            SimpleDateFormat sdf =
+                    new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+
+            ((HeaderHolder) holder).txtDate.setText(
+                    sdf.format(group.getDate())
+            );
+
+            ((HeaderHolder) holder).txtTotal.setText(
+                    group.getTotal() + " DH"
+            );
+
         } else {
-            holder.category.setText("Sans catégorie");
-        }
 
-        if (d.getDescription() != null && !d.getDescription().trim().isEmpty()) {
-            holder.description.setText(d.getDescription());
-            holder.description.setVisibility(View.VISIBLE);
-        } else {
-            holder.description.setVisibility(View.GONE);
-        }
+            Depense d = (Depense) items.get(position);
+            ItemHolder h = (ItemHolder) holder;
 
-        // Clic sur l'item → détail
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onItemClick(d);
-        });
+            h.amount.setText(d.getMontant() + " DH");
+
+            if (d.getCategoryIds() != null && !d.getCategoryIds().isEmpty()) {
+                h.category.setText(String.join(", ", d.getCategoryIds()));
+            } else {
+                h.category.setText("Sans catégorie");
+            }
+
+            if (d.getDescription() != null && !d.getDescription().trim().isEmpty()) {
+                h.description.setText(d.getDescription());
+                h.description.setVisibility(View.VISIBLE);
+            } else {
+                h.description.setVisibility(View.GONE);
+            }
+
+            h.itemView.setOnClickListener(v -> {
+                if (listener != null) listener.onItemClick(d);
+            });
+        }
     }
 
     @Override
     public int getItemCount() {
-        return depenses.size();
+        return items.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    static class HeaderHolder extends RecyclerView.ViewHolder {
+        TextView txtDate, txtTotal;
+
+        HeaderHolder(@NonNull View itemView) {
+            super(itemView);
+            txtDate = itemView.findViewById(R.id.txtHeaderDate);
+            txtTotal = itemView.findViewById(R.id.txtHeaderTotal);
+        }
+    }
+
+    static class ItemHolder extends RecyclerView.ViewHolder {
         TextView category, amount, description;
 
-        ViewHolder(@NonNull View itemView) {
+        ItemHolder(@NonNull View itemView) {
             super(itemView);
             category = itemView.findViewById(R.id.txtCategory);
             amount = itemView.findViewById(R.id.txtAmount);

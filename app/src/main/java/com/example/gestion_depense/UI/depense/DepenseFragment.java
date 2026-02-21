@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.gestion_depense.Data.Firebase.FirebaseManager;
 import com.example.gestion_depense.Data.Model.Depense;
+import com.example.gestion_depense.Data.Model.DepenseGroup;
 import com.example.gestion_depense.R;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -30,7 +31,7 @@ public class DepenseFragment extends Fragment {
     // 🔹 Etat des filtres
     private String currentCategoryQuery = "";
     private Calendar currentDateFilter = null;
-    private String currentDateType = null; // "day", "month", "year"
+    private String currentDateType = null;
 
     @Nullable
     @Override
@@ -49,7 +50,7 @@ public class DepenseFragment extends Fragment {
 
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_item,
-                new String[]{"Jour", "Mois", "Année"});
+                new String[]{"Mois", "Année"});
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerDateType.setAdapter(spinnerAdapter);
 
@@ -58,11 +59,6 @@ public class DepenseFragment extends Fragment {
 
         // 🔹 Clic sur item → détail
         adapter.setOnItemClickListener(new DepenseAdapter.OnItemClickListener() {
-            @Override
-            public void onEdit(Depense depense) { }
-
-            @Override
-            public void onDelete(Depense depense) { }
 
             @Override
             public void onItemClick(Depense depense) {
@@ -106,23 +102,6 @@ public class DepenseFragment extends Fragment {
         Calendar calendar = Calendar.getInstance();
 
         switch (type) {
-            case "Jour":
-                new DatePickerDialog(requireContext(),
-                        (view, year, month, dayOfMonth) -> {
-                            calendar.set(year, month, dayOfMonth);
-                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                            txtDate.setText("📅 " + sdf.format(calendar.getTime()));
-                            currentDateFilter = calendar;
-                            currentDateType = "day";
-                            applyFilters();
-
-                        },
-                        calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH))
-                        .show();
-                break;
-
             case "Mois":
                 LinearLayout layoutMonth = new LinearLayout(requireContext());
                 layoutMonth.setOrientation(LinearLayout.HORIZONTAL);
@@ -175,16 +154,19 @@ public class DepenseFragment extends Fragment {
         }
     }
     private void applyFilters() {
-        List<Depense> filtered = new ArrayList<>();
+
+        Map<String, List<Depense>> groupedMap =
+                new TreeMap<>(Collections.reverseOrder());
 
         for (Depense d : allDepenses) {
 
             boolean matchCategory = true;
             boolean matchDate = true;
 
-            // 🔹 Filtre catégorie
+            // 🔹 Filtre texte
             if (!currentCategoryQuery.isEmpty()) {
                 matchCategory = false;
+
                 if (d.getCategoryIds() != null) {
                     for (String cat : d.getCategoryIds()) {
                         if (cat.toLowerCase().contains(currentCategoryQuery)) {
@@ -197,10 +179,12 @@ public class DepenseFragment extends Fragment {
 
             // 🔹 Filtre date
             if (currentDateFilter != null && d.getDate() != null) {
+
                 Calendar dep = Calendar.getInstance();
                 dep.setTime(d.getDate());
 
                 switch (currentDateType) {
+
                     case "day":
                         matchDate =
                                 dep.get(Calendar.YEAR) == currentDateFilter.get(Calendar.YEAR) &&
@@ -221,29 +205,58 @@ public class DepenseFragment extends Fragment {
                 }
             }
 
-            // 🔹 Appliquer les deux filtres ensemble
-            if (matchCategory && matchDate) {
-                filtered.add(d);
+            if (matchCategory && matchDate && d.getDate() != null) {
+
+                String key = new SimpleDateFormat(
+                        "yyyy-MM-dd",
+                        Locale.getDefault()
+                ).format(d.getDate());
+
+                groupedMap
+                        .computeIfAbsent(key, k -> new ArrayList<>())
+                        .add(d);
             }
         }
 
-        adapter.setDepenses(filtered);
+        List<DepenseGroup> groups = new ArrayList<>();
+
+        for (Map.Entry<String, List<Depense>> entry : groupedMap.entrySet()) {
+
+            try {
+                Date date = new SimpleDateFormat(
+                        "yyyy-MM-dd",
+                        Locale.getDefault()
+                ).parse(entry.getKey());
+
+                groups.add(new DepenseGroup(date, entry.getValue()));
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        adapter.setGroupedDepenses(groups);
     }
 
     private void loadDepenses() {
+
         FirebaseManager.getDB()
                 .collection("depenses")
                 .get()
                 .addOnSuccessListener(query -> {
+
                     List<Depense> list = new ArrayList<>();
+
                     for (QueryDocumentSnapshot doc : query) {
                         Depense d = doc.toObject(Depense.class);
-                        d.setId(doc.getId()); // 🔹 Garder l'ID pour modification/suppression
+                        d.setId(doc.getId());
                         list.add(d);
                     }
+
                     allDepenses.clear();
                     allDepenses.addAll(list);
-                    adapter.setDepenses(list);
+
+                    applyFilters();
                 });
     }
 }
