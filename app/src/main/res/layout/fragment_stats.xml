@@ -5,18 +5,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#F5F5F5">
-
-    <!-- Titre de la page -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Statistiques"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#333333"
-        android:padding="16dp"
-        android:paddingBottom="8dp"/>
-
     <!-- TabLayout pour les onglets -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
