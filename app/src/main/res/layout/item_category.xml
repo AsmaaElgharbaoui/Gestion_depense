@@ -2,14 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:padding="16dp">
 
+    <!-- Ligne avec nom et flèche (mêmes IDs) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp"
-        android:background="@color/white">
+        android:gravity="center_vertical">
 
         <TextView
             android:id="@+id/txtName"
@@ -17,32 +19,64 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Catégorie"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
+            android:textSize="18sp"
+            android:textStyle="normal"
+            android:textColor="#333333"/>
 
-        <ImageView
-            android:id="@+id/btnEdit"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="8dp"
-            android:src="@android:drawable/ic_menu_edit"
-            android:contentDescription="Modifier"
+        <!-- ✨ AJOUT SIMPLE : Flèche pour indiquer le swipe -->
+        <TextView
+            android:id="@+id/txtSwipeArrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:textSize="20sp"
+            android:textColor="#CCCCCC"
             android:visibility="gone"/>
-
-        <ImageView
-            android:id="@+id/btnDelete"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_delete"
-            android:contentDescription="Supprimer"
-            android:visibility="gone"/>
-
     </LinearLayout>
 
-    <!-- ✅ Séparateur -->
+    <!-- Boutons (inchangés, mêmes IDs) -->
+    <LinearLayout
+        android:id="@+id/layoutActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:weightSum="2"
+        android:layout_marginTop="12dp"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btnEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="MODIFIER"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="@drawable/button_blue_rounded"
+            android:layout_marginEnd="8dp"
+            android:padding="10dp"/>
+
+        <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SUPPRIMER"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="@drawable/button_red_rounded"
+            android:layout_marginStart="8dp"
+            android:padding="10dp"/>
+    </LinearLayout>
+
+    <!-- Séparateur (inchangé) -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#DDDDDD"/>
+        android:background="#E0E0E0"
+        android:layout_marginTop="12dp"/>
 
 </LinearLayout>

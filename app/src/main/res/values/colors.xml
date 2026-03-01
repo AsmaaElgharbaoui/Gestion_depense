@@ -16,4 +16,8 @@
     <!-- Pour catégories -->
     <color name="category_default_bg">#EEEEEE</color>
     <color name="category_custom_bg">#FFFFFF</color>
+    <color name="blue_light">#402197F3</color>
+    <color name="blue_normal">#2196F3</color>
+    <color name="red_light">#40F44336</color>
+    <color name="red_normal">#F44336</color>
 </resources>

@@ -33,7 +33,7 @@ public class DepenseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.listener = listener;
     }
 
-    // 🔥 IMPORTANT : méthode demandée
+
     public void setGroupedDepenses(List<DepenseGroup> groups) {
         items.clear();
 

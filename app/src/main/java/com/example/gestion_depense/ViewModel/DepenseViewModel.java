@@ -16,7 +16,7 @@ public class DepenseViewModel extends ViewModel {
     private final MutableLiveData<List<Depense>> depenses = new MutableLiveData<>();
     private ListenerRegistration listener;
 
-    // 📥 Lire les dépenses depuis Firestore
+    // Lire les dépenses depuis Firestore
     public LiveData<List<Depense>> getDepenses() {
         if (depenses.getValue() == null) {
             loadDepenses();
