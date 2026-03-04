@@ -31,4 +31,8 @@ public class Depense implements Serializable {
     public void setDate(Date date) { this.date = date; }
     public List<String> getCategoryIds() { return categoryIds; }
     public void setCategoryIds(List<String> categoryIds) { this.categoryIds = categoryIds; }
+
+    public boolean isValid() {
+        return montant > 0;
+    }
 }

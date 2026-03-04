@@ -1,5 +1,6 @@
 package com.example.gestion_depense.Data.Model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -8,9 +9,14 @@ public class DepenseGroup {
     private Date date;
     private List<Depense> depenses;
 
+    public DepenseGroup(Date date) {
+        this.date = date;
+        this.depenses = new ArrayList<>();
+    }
+
     public DepenseGroup(Date date, List<Depense> depenses) {
         this.date = date;
-        this.depenses = depenses;
+        this.depenses = (depenses != null) ? depenses : new ArrayList<>();
     }
 
     public Date getDate() {
@@ -28,4 +34,11 @@ public class DepenseGroup {
         }
         return total;
     }
+
+
+    public void addDepense(Depense depense) {
+        depenses.add(depense);
+    }
+
+
 }

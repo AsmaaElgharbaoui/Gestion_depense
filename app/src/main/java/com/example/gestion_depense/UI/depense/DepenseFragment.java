@@ -28,7 +28,6 @@ public class DepenseFragment extends Fragment {
     private EditText edtSearch;
     private Spinner spinnerDateType;
     private final List<Depense> allDepenses = new ArrayList<>();
-    // 🔹 Etat des filtres
     private String currentCategoryQuery = "";
     private Calendar currentDateFilter = null;
     private String currentDateType = null;
@@ -57,7 +56,7 @@ public class DepenseFragment extends Fragment {
         adapter = new DepenseAdapter();
         recyclerView.setAdapter(adapter);
 
-        // 🔹 Clic sur item → détail
+
         adapter.setOnItemClickListener(new DepenseAdapter.OnItemClickListener() {
 
             @Override
@@ -71,7 +70,7 @@ public class DepenseFragment extends Fragment {
             }
         });
 
-        // 🔹 Filtre texte
+        //  Filtre texte
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void afterTextChanged(Editable s) {}
@@ -81,10 +80,10 @@ public class DepenseFragment extends Fragment {
             }
         });
 
-        // 🔹 Filtre date
+        // Filtre date
         txtDate.setOnClickListener(v -> openDateFilter());
 
-        // 🔹 Charger les dépenses
+        //  Charger les dépenses
         loadDepenses();
 
         return view;
@@ -163,7 +162,7 @@ public class DepenseFragment extends Fragment {
             boolean matchCategory = true;
             boolean matchDate = true;
 
-            // 🔹 Filtre texte
+            //  Filtre texte
             if (!currentCategoryQuery.isEmpty()) {
                 matchCategory = false;
 
@@ -177,7 +176,7 @@ public class DepenseFragment extends Fragment {
                 }
             }
 
-            // 🔹 Filtre date
+            //  Filtre date
             if (currentDateFilter != null && d.getDate() != null) {
 
                 Calendar dep = Calendar.getInstance();
