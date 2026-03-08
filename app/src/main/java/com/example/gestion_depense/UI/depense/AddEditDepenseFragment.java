@@ -28,7 +28,7 @@ public class AddEditDepenseFragment extends Fragment {
     private Depense depenseToEdit = null;
     private Map<String, CheckBox> categoryCheckBoxMap = new HashMap<>();
 
-    // ✅ Création d'une instance avec une dépense existante
+    // Création d'une instance avec une dépense existante
     public static AddEditDepenseFragment newInstance(Depense depense) {
         AddEditDepenseFragment fragment = new AddEditDepenseFragment();
         Bundle args = new Bundle();
@@ -57,7 +57,7 @@ public class AddEditDepenseFragment extends Fragment {
         setupDatePicker();
         setupButtons();
 
-        // 🔹 Vérifier si on est en mode édition
+        // Vérifier si on est en mode édition
         if (getArguments() != null && getArguments().containsKey("depense")) {
             depenseToEdit = (Depense) getArguments().getSerializable("depense");
             if (depenseToEdit != null) loadDepenseToEdit();
@@ -192,7 +192,6 @@ public class AddEditDepenseFragment extends Fragment {
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(requireContext(), "Dépense modifiée", Toast.LENGTH_SHORT).show();
 
-                        // 🔹 Retour à la page accueil des dépenses
                         requireActivity().getSupportFragmentManager()
                                 .popBackStack("depense_accueil", 0); // Nommer le backstack
                     })
@@ -205,7 +204,6 @@ public class AddEditDepenseFragment extends Fragment {
                     .addOnSuccessListener(doc -> {
                         Toast.makeText(requireContext(), "Dépense ajoutée", Toast.LENGTH_SHORT).show();
 
-                        // 🔹 Retour à la page accueil des dépenses
                         requireActivity().onBackPressed();
                     })
                     .addOnFailureListener(e -> Toast.makeText(requireContext(),

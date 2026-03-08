@@ -10,7 +10,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- ===== Titre ===== -->
+
         <TextView
             android:id="@+id/txtTitle"
             android:layout_width="wrap_content"
@@ -21,7 +21,7 @@
             android:textColor="?attr/colorOnBackground"
             android:layout_marginBottom="16dp" />
 
-        <!-- ===== Montant ===== -->
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -36,7 +36,6 @@
             android:inputType="numberDecimal"
             android:layout_marginBottom="16dp" />
 
-        <!-- ===== Catégories ===== -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -44,7 +43,6 @@
             android:textColor="?attr/colorOnBackground"
             android:layout_marginBottom="8dp" />
 
-        <!-- Ici tu ajoutes dynamiquement les CheckBox -->
         <LinearLayout
             android:id="@+id/layoutCategories"
             android:layout_width="match_parent"
@@ -52,7 +50,6 @@
             android:orientation="vertical"
             android:layout_marginBottom="16dp" />
 
-        <!-- ===== Date ===== -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -68,7 +65,6 @@
             android:clickable="true"
             android:layout_marginBottom="16dp" />
 
-        <!-- ===== Description ===== -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -82,7 +78,6 @@
             android:hint="Description"
             android:layout_marginBottom="24dp" />
 
-        <!-- ===== Boutons ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
