@@ -88,11 +88,23 @@ public class CategoryFragment extends Fragment {
     }
 
     public void deleteCategory(Category c) {
-        viewModel.deleteCategory(c);
-        Toast.makeText(getContext(),
-                "Catégorie supprimée",
-                Toast.LENGTH_SHORT).show();
-        adapter.closeOpenItem(); // Fermer les boutons
+
+        new android.app.AlertDialog.Builder(getContext())
+                .setTitle("Confirmation")
+                .setMessage("Voulez-vous vraiment supprimer cette catégorie ?")
+                .setPositiveButton("Oui", (dialog, which) -> {
+
+                    viewModel.deleteCategory(c);
+
+                    Toast.makeText(getContext(),
+                            "Catégorie supprimée",
+                            Toast.LENGTH_SHORT).show();
+
+                })
+                .setNegativeButton("Non", null)
+                .show();
+
+        adapter.closeOpenItem();
     }
 
     public void showDefaultCategoryMessage() {

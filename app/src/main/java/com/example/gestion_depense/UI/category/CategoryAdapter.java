@@ -38,7 +38,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         Category c = list.get(position);
         holder.txtName.setText(c.getName());
 
-        // ✨ GESTION SIMPLE DE LA FLÈCHE
+        //  GESTION SIMPLE DE LA FLÈCHE
         if (!c.isDefault() && openPosition != position) {
             holder.txtSwipeArrow.setVisibility(View.VISIBLE);
         } else {
@@ -53,7 +53,18 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         }
 
         holder.btnEdit.setOnClickListener(v -> {
-            fragment.openAddEditDialog(c);
+
+            new android.app.AlertDialog.Builder(v.getContext())
+                    .setTitle("Modifier")
+                    .setMessage("Voulez-vous modifier cette catégorie ?")
+                    .setPositiveButton("Oui", (dialog, which) -> {
+
+                        fragment.openAddEditDialog(c);
+
+                    })
+                    .setNegativeButton("Non", null)
+                    .show();
+
             closeOpenItem();
         });
 

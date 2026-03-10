@@ -23,7 +23,7 @@
             android:textStyle="normal"
             android:textColor="#333333"/>
 
-        <!-- ✨ AJOUT SIMPLE : Flèche pour indiquer le swipe -->
+        <!--  AJOUT SIMPLE : Flèche pour indiquer le swipe -->
         <TextView
             android:id="@+id/txtSwipeArrow"
             android:layout_width="wrap_content"

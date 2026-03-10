@@ -48,7 +48,7 @@ public class DepenseViewModel extends ViewModel {
                 .add(depense);
     }
 
-    // ✏ Modifier une dépense
+    //  Modifier une dépense
     public void updateDepense(Depense depense) {
         FirebaseManager.getDB()
                 .collection("expenses")
@@ -56,7 +56,7 @@ public class DepenseViewModel extends ViewModel {
                 .set(depense);
     }
 
-    // 🗑 Supprimer une dépense
+    // Supprimer une dépense
     public void deleteDepense(String id) {
         FirebaseManager.getDB()
                 .collection("expenses")
